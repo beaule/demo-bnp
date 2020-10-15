@@ -15,26 +15,7 @@ var Custom = require("../lib/custom.js");
 /***********************************
  * Private functions
  ************************************/
-function getPreferedCreativeWork(req, prefered, done) {
-  var query = {
-    query:
-      '{CreativeWork(filter: { Providers:{uri: "https://www.vrt.be" }}){uri image}}',
-    variables: {}
-  };
-  if (prefered) {
-    query = {
-      query: "{CreativeWorkPrefered{uri image}}",
-      variables: {}
-    };
-  }
-  Custom.queryCreativeWorks(Session.getUserAccessToken(req), query, function (
-    response
-  ) {
-    if (response != null) {
-      return done(response.data);
-    } else return done(null);
-  });
-}
+
 /***********************************
  * Routers
  ************************************/
@@ -82,25 +63,15 @@ router.get("/callback", function (req, res, next) {
  * @param {req} request
  * @param {res} response
  */
-function renderHome(req, res, prefered) {
-  getPreferedCreativeWork(req, prefered, function (creativeWorks) {
-    console.log("****" + creativeWorks);
-    var creativeWorksForUi = null;
-    if (creativeWorks != null && prefered)
-      creativeWorksForUi = creativeWorks.CreativeWorkPrefered;
-    if (creativeWorks != null && !prefered)
-      creativeWorksForUi = creativeWorks.CreativeWork;
-
-    res.render("home", {
-      layout: "master",
-      actionActivateConsent: Authorization.authorize(
-        process.env.CLIENT_ID,
-        process.env.APP_URL + "callback",
-        Consents.ROOT_PATH_CONSENT_RECEIPT + process.env.CONSENT_RECEIPT_ID
-      ),
-      actionRevokeConsent: Authorization.deAuthorize(),
-      creativeWorks: creativeWorksForUi
-    });
+function renderHome(req, res, active) {
+  res.render("home", {
+    layout: "master",
+    actionActivateConsent: Authorization.authorize(
+      process.env.CLIENT_ID,
+      process.env.APP_URL + "callback",
+      Consents.ROOT_PATH_CONSENT_RECEIPT + process.env.CONSENT_RECEIPT_ID
+    ),
+    active: active
   });
 }
 
