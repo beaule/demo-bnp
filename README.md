@@ -1,2 +1,2 @@
-# demo-bnp
+# sample-app
 Created with CodeSandbox
